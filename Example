@@ -2,7 +2,7 @@ This is an exercise in performing data analysis on a social media company's data
 
 Q: What percent of the time does a user like a message, immediately followed by sending a message?
 A: A user sends a message within one minute of liking a message 17.1% of the time.
-My approach: I counted the number of times users liked a message, 59,248 times. Then I ran a query to find all instances when a “like” occurred and when a “send message” occured within 60 seconds, 10,134 times. Dividing those two numbers is 17.1%. Since this data is in Tableau, the interactive nature of the visualization would allow executives to pick what time period they would like to define as “immediately” and the percentage would update in real time, since “immediate” is a subjective concept. Queries below:
+My approach: I counted the number of times users liked a message, 59,248 times. Then I ran a query to find all instances when a “like” occurred and when a “send message” occured within 60 seconds, 10,134 times. Dividing those two numbers is 17.1%. I made a viz in Tableau, the interactive nature of the visualization would allow executives to pick what time period they would like to define as “immediately” and the percentage would update in real time, since “immediate” is a subjective concept. Queries below:
 
 Query to find likes followed by sends: 
 SELECT * from
@@ -22,11 +22,16 @@ A: Company 6 had the highest number of message sent engagement, with an average 
 My Approach: I joined the event and user tables then imported the data into Tableau. I created a calculated field to divide the number of messages sent by the number of users (creating an average), and I then calculated the grand total of the daily averages to come up with a metric which spoke to the impact of each individual day’s engagement ratio. I then divided that sum total by 31, the number of days in the month, to come up with the average number of messages per company per user per day.
 
 Query: 
-SELECT e.user_id, e.occurred_at, e.event_name, u.company_id  FROM thezebradatateam.events e inner join thezebradatateam.users u on u.user_id=e.user_id where e.event_name = 'send_message' and e.occurred_at between '07/01/2014' and '08/01/2014'
+SELECT e.user_id, e.occurred_at, e.event_name, u.company_id  
+FROM thezebradatateam.events e 
+inner join thezebradatateam.users u on u.user_id=e.user_id 
+where e.event_name = 'send_message' and e.occurred_at between '07/01/2014' and '08/01/2014'
 
 Q: Media Company X’s product team has decided to run an A/B test to determine if a proposed change in their status update call-to-action will lead to increased user engagement. You are tasked with determining if this test was successful. Using insights from the provided data, what recommendations would you make?
 A: The test increased engagement. The test group had 90.4 engagements (likes or sent messages) per user per day of the test versus 62.8 engagements per day for the control group. The difference is not due to chance.
 My approach: I joined the event and experiment tables because I assume “engagement” referred to sent/liked messages, as those 2 actions were asked to be analyzed in the questions above. I assumed that the occurred_at date in the experiment table was when the user_id was entered into either control or test group, and I created a datediff field in Tableau to filter only sent/liked message activities after the date the user was entered into the test/control group. I then calculated the number of messages liked/sent per user participating in the trial per day and found the average of the control and test groups, which was 62.8 and 90.4 respectively. When I conducted a t-Test: Two-sample Assuming Unequal Variances, on the number of engagements per user per day of the two groups, the p-value in the analysis was .0.000107019, which is below .05, which is the threshold from 95% confidence, which is the standard confidence level for testing for statistical significance. So we can assume the difference in the groups’ behavior is not due to chance but rather the change on the website.
 
 Query: 
-SELECT ex.user_id, ex.occurred_at, ex.experiment_group, ev.event_name, ev.occurred_at FROM thezebradatateam.experiments ex inner join thezebradatateam.events ev on ex.user_id = ev.user_id group by ex.user_id, ex.occurred_at, ex.experiment_group, ev.event_name, ev.occurred_at
+SELECT ex.user_id, ex.occurred_at, ex.experiment_group, ev.event_name, ev.occurred_at 
+FROM thezebradatateam.experiments ex 
+inner join thezebradatateam.events ev on ex.user_id = ev.user_id 
